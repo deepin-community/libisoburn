@@ -1,0 +1,154 @@
+Source: libisoburn
+Maintainer: Debian Libburnia packagers <pkg-libburnia-devel@lists.alioth.debian.org>
+Uploaders: George Danchev <danchev@spnet.net>,
+           Mario Danic <mario.danic@gmail.com>,
+           Thomas Schmitt <scdbackup@gmx.net>
+Section: libs
+Priority: optional
+Build-Depends: pkg-config,
+               debhelper-compat (= 12),
+               libburn-dev (>= 1.5.4),
+               libisofs-dev (>= 1.5.4),
+               libreadline-dev,
+               libjte-dev (>= 1.22)
+Standards-Version: 4.5.1
+Vcs-Browser: https://salsa.debian.org/optical-media-team/libisoburn
+Vcs-Git: https://salsa.debian.org/optical-media-team/libisoburn.git
+Homepage: http://libburnia-project.org
+
+Package: libisoburn1
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Description: library to handle creation and inspection of ISO-9660 file systems
+ libisoburn is a frontend for the libraries libburn and libisofs. It handles
+ the creation, loading, manipulation and burning of ISO-9660 filesystem images.
+ This library provides a low-level API, called libisoburn API, which
+ enhances and partly encapsulates the API of libburn and libisofs. Further
+ there is a higher level API, called xorriso API, which completely encapsulates
+ the API of libburn, libisofs, and libisoburn. It implements all parts of
+ xorriso except the small initialization module xorriso/xorriso_main.c .
+ .
+ This package contains the shared object files for libisoburn.
+
+Package: libisoburn-doc
+Architecture: all
+Multi-Arch: foreign
+Section: doc
+Depends: ${misc:Depends}
+Description: documentation package for libisoburn
+ libisoburn is a frontend for the libraries libburn and libisofs. It handles
+ the creation, loading, manipulation and burning of ISO-9660 filesystem images.
+ This library provides a low-level API, called libisoburn API, which
+ enhances and partly encapsulates the API of libburn and libisofs. Further
+ there is a higher level API, called xorriso API, which completely encapsulates
+ the API of libburn, libisofs, and libisoburn. It implements all parts of
+ xorriso except the small initialization module xorriso/xorriso_main.c .
+ .
+ This package contains the documentation for libisoburn.
+
+Package: libisoburn-dev
+Architecture: any
+Multi-Arch: same
+Section: libdevel
+Depends: ${misc:Depends},
+         libisoburn1 (= ${binary:Version}),
+         libisofs-dev,
+         libburn-dev
+Suggests: libisoburn-doc (= ${source:Version})
+Description: development package for libisoburn
+ libisoburn is a frontend for the libraries libburn and libisofs. It handles
+ the creation, loading, manipulation and burning of ISO-9660 filesystem images.
+ This library provides a low-level API, called libisoburn API, which
+ enhances and partly encapsulates the API of libburn and libisofs. Further
+ there is a higher level API, called xorriso API, which completely encapsulates
+ the API of libburn, libisofs, and libisoburn. It implements all parts of
+ xorriso except the small initialization module xorriso/xorriso_main.c .
+ .
+ This package contains the headers, pkgconfig data, and static library for
+ libisoburn.
+
+Package: xorriso
+Architecture: any
+Section: otherosfs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libisoburn1 (= ${binary:Version}),
+         libburn4 (>= 1.4.8),
+         libisofs6 (>= 1.4.8)
+Suggests: xorriso-tcltk,
+          jigit,
+          cdck [!kfreebsd-any]
+Description: command line ISO-9660 and Rock Ridge manipulation tool
+ xorriso is a command line and dialog application, which creates, loads,
+ manipulates, and writes ISO-9660 file system images with Rock Ridge
+ extensions.
+ .
+ It maps file objects from POSIX compliant file systems into Rock Ridge
+ enhanced ISO-9660 file systems and features session-wise manipulation
+ of such file systems. It can load the management information of existing
+ ISO images and write the resulting session to optical medium or as
+ file system objects.
+ .
+ Supported optical media types:
+  - CD-R, CD-RW
+  - DVD-R, DVD-R DL, DVD-RW, DVD+R, DVD+R DL, DVD+RW, DVD-RAM
+  - BD-R, BD-RE
+ .
+ Some interesting features:
+  - Emulation of the mkisofs and cdrecord programs.
+  - Data backup and restore capabilities - compression, ACLs, and filters.
+  - Isohybrid MBR with partition offset - features booting ISOLINUX from
+    USB sticks, or from other devices that appear to PC-BIOS as hard disks.
+    The images carry a conventional partition table for a USB stick;
+    the first partition reports the size of the ISO image, but starts at a
+    non-zero address. It is nevertheless still mountable.
+  - Jigdo Template Export - jigdo representation of the resulting ISO-9660
+    image, generated on the fly.
+ .
+ Test suite:
+  xorriso source code comes with a release engineering test-suite called
+  `releng', which aims to cover most of the functionality of the xorriso
+  and the underlying libraries of libburn, libisofs, and libisoburn.
+
+Package: xorriso-tcltk
+Architecture: all
+Section: utils
+Depends: ${misc:Depends},
+         xorriso (>= ${binary:Version}),
+         tk,
+         bwidget
+Description: educational GUI frontend for ISO-9660 manipulation tool xorriso
+ xorriso is a command line and dialog application, which creates, loads,
+ manipulates, and writes ISO-9660 file system images with Rock Ridge
+ extensions.
+ .
+ xorriso-tcltk offers the most important features in a single GUI window
+ together with help texts and references to xorriso's man page.
+ The xorriso commands which get triggered by GUI components are shown in a
+ scrollable text field or optionally may get logged to a file.
+ Click on any GUI component by the rightmost mouse button to see the
+ component's help text.
+
+Package: xorriso-dd-target
+Architecture: all
+Section: utils
+Depends: ${misc:Depends}
+Description: Device evaluator and disk image copier for GNU/Linux
+ xorriso-dd-target is a command-line tool to evaluate block devices
+ of the Linux kernel whether they are suitable targets for a disk image
+ file and to optionally copy the image file to one of them.
+ It is specialized on the device names of the Linux kernel and uses the
+ capabilities of util-linux program lsblk. Therefore it refuses to run
+ on non-Linux kernels.
+ .
+ The main purpose of xorriso-dd-target is to inspect the device files of
+ disk-like storage  media and to judge whether they look like removable
+ devices with disposable content.
+ If a single plausible candidate is detected, then the program is
+ willing to copy a disk image file onto it. This will overwrite or make
+ inaccessible the previous partition table and all previous data content
+ of the target device.
+

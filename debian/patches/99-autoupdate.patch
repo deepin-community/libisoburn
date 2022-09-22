@@ -1,0 +1,207 @@
+Description: Create state after autoupdate of configure.ac and acinclude.m4
+Author: Thomas Schmitt <scdbackup@gmx.net>
+
+--- a/acinclude.m4
++++ b/acinclude.m4
+@@ -54,7 +54,7 @@
+     *)
+       ARCH=
+       LIBBURN_ARCH_LIBS=
+-#      AC_ERROR([You are attempting to compile for an unsupported platform])
++#      AC_MSG_ERROR(You are attempting to compile for an unsupported platform)
+       ;;
+   esac
+ 
+@@ -79,14 +79,11 @@
+   libburnia_liconv="no"
+   libburnia_save_LIBS="$LIBS"
+   LIBS="$LIBS -liconv"
+-  AC_TRY_LINK([#include <stdlib.h>
+-#include <iconv.h>],
+-    [iconv_t cd = iconv_open("","");
++  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdlib.h>
++#include <iconv.h>]], [[iconv_t cd = iconv_open("","");
+      iconv(cd,NULL,NULL,NULL,NULL);
+-     iconv_close(cd);],
+-     [libburnia_liconv="yes"],
+-     [LIBS="$libburnia_save_LIBS"]
+-  )
++     iconv_close(cd);]])],[libburnia_liconv="yes"],[LIBS="$libburnia_save_LIBS"
++  ])
+   AC_MSG_RESULT([$libburnia_liconv])
+ 
+   if test x"$libburnia_save_LIBS" = x"$LIBS"
+@@ -98,12 +95,12 @@
+ 
+   dnl Check for iconv(..., const char **inbuf, ...)
+   AC_MSG_CHECKING([for const qualifier with iconv() ])
+-  AC_TRY_COMPILE([
++  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+ #include <stdlib.h>
+ #include <iconv.h>
+ size_t iconv (iconv_t cd, char * *inbuf, size_t *inbytesleft, char * *outbuf, size_t *outbytesleft);
+-], [], [libburnia_iconv_const=""], [libburnia_iconv_const="const"]
+-  )
++]], [[]])],[libburnia_iconv_const=""],[libburnia_iconv_const="const"
++  ])
+   if test x$libburnia_iconv_const = xconst
+   then
+     AC_DEFINE_UNQUOTED([ICONV_CONST], [const])
+@@ -123,7 +120,7 @@
+   then
+     dnl Check for the essential gestures of libisofs/util.c
+     AC_MSG_CHECKING([for iconv() to be accessible now ])
+-    AC_TRY_LINK([
++    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+ #include <stdlib.h>
+ #include <wchar.h>
+ #include <string.h>
+@@ -134,12 +131,11 @@
+ #include <iconv.h>
+ #include <locale.h>
+ #include <langinfo.h>
+-#include <unistd.h>],
+-[iconv_t cd = iconv_open("","");
++#include <unistd.h>]], [[iconv_t cd = iconv_open("","");
+ iconv(cd,NULL,NULL,NULL,NULL);
+ iconv_close(cd);
+-], [iconv_test="yes"], [iconv_test="no"]
+-    )
++]])],[iconv_test="yes"],[iconv_test="no"
++    ])
+     AC_MSG_RESULT([$iconv_test])
+     if test x$iconv_test = xno
+     then
+@@ -164,22 +160,21 @@
+ dnl Variable LIBS has to be set by the caller.
+ AC_DEFUN([LIBBURNIA_TRY_EDITLINE],
+ [
+-    AC_TRY_LINK([
++    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+ #include <ctype.h>
+ #include <sys/types.h>
+ #include <unistd.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <string.h>
+-#include <histedit.h>],
+-[EditLine *editline_handle; History *editline_history; HistEvent ev; int count;
++#include <histedit.h>]], [[EditLine *editline_handle; History *editline_history; HistEvent ev; int count;
+ editline_handle= el_init("dummy", stdin, stdout, stderr);
+ el_set(editline_handle, EL_EDITOR, "emacs");
+ editline_history= history_init();
+ history(editline_history, &ev, H_SETSIZE, 1000);
+ el_gets(editline_handle, &count);
+-], [editline_test="yes"], [editline_test="no"]
+-    )
++]])],[editline_test="yes"],[editline_test="no"
++    ])
+ ])
+ 
+ dnl LIBBURNIA_ASSERT_EDITLINE is by Thomas Schmitt, libburnia project
+@@ -214,7 +209,7 @@
+ dnl Variable LIBS has to be set by the caller.
+ AC_DEFUN([LIBBURNIA_TRY_READLINE],
+ [
+-    AC_TRY_LINK([
++    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+ #include <ctype.h>
+ #include <sys/types.h>
+ #include <unistd.h>
+@@ -222,13 +217,12 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <readline/readline.h>
+-#include <readline/history.h>],
+-[HIST_ENTRY **hl;
++#include <readline/history.h>]], [[HIST_ENTRY **hl;
+ readline("");
+ add_history("");
+ hl= history_list();
+-], [readline_test="yes"], [readline_test="no"]
+-    )
++]])],[readline_test="yes"],[readline_test="no"
++    ])
+ ])
+ 
+ dnl LIBBURNIA_ASSERT_READLINE is by Thomas Schmitt, libburnia project
+@@ -269,8 +263,7 @@
+ [
+     libburnia_save_LDFLAGS="$LDFLAGS"
+     LDFLAGS="$LDFLAGS -Wl,--version-script=$srcdir/libisoburn/libisoburn.ver"
+-    AC_TRY_LINK([#include <stdio.h>], [printf("Hello\n");],
+-                [vers_libs_test="yes"], [vers_libs_test="no"])
++    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[printf("Hello\n");]])],[vers_libs_test="yes"],[vers_libs_test="no"])
+     if test x$vers_libs_test = xyes
+     then
+         LIBLDFLAGS="-Wl,--version-script=$srcdir/libisoburn/libisoburn.ver"
+@@ -337,9 +330,8 @@
+ AC_DEFUN([LIBBURNIA_TRY_TIMEZONE],
+ [
+     echo -n "checking for timezone variable ... "
+-    AC_TRY_LINK([ #include <time.h> ], [long int i; i = 1 - timezone; ],
+-                [LIBBURNIA_TIMEZONE="timezone"], [LIBBURNIA_TIMEZONE="0"]
+-    )
++    AC_LINK_IFELSE([AC_LANG_PROGRAM([[ #include <time.h> ]], [[long int i; i = 1 - timezone; ]])],[LIBBURNIA_TIMEZONE="timezone"],[LIBBURNIA_TIMEZONE="0"
++    ])
+     echo "$LIBBURNIA_TIMEZONE"
+ ])
+ 
+@@ -356,8 +348,7 @@
+       dummy=dummy
+     else
+       LIBS="$LIBS $LIBBURN_ARCH_LIBS"
+-      AC_TRY_LINK([#include <stdio.h>], [printf("Hello\n");],
+-                  [archlibs_test="yes"], [archlibs_test="no"])
++      AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[printf("Hello\n");]])],[archlibs_test="yes"],[archlibs_test="no"])
+       LIBS="$libburnia_save_LIBS"
+       if test x$archlibs_test = xno
+       then
+@@ -386,15 +377,12 @@
+   AH_TEMPLATE([Libburn_use_sg_dummY],
+               [Define to compile without OS specific SCSI features])
+   AC_MSG_CHECKING([for missing scsi/scsi.h on Linux])
+-  AC_TRY_COMPILE([
++  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+ #ifdef __linux
+ #include <scsi/scsi.h>
+ #endif
+-     ],
+-     [;],
+-     [AC_MSG_RESULT([no])],
+-     [AC_DEFINE([Libburn_use_sg_dummY], [yes])
+-      AC_MSG_RESULT([yes])]
+-  )
++     ]], [[;]])],[AC_MSG_RESULT([no])],[AC_DEFINE([Libburn_use_sg_dummY], [yes])
++      AC_MSG_RESULT([yes])
++  ])
+ ])
+ 
+--- a/configure.ac
++++ b/configure.ac
+@@ -1,5 +1,5 @@
+-AC_INIT([libisoburn], [1.5.4], [http://libburnia-project.org])
+-AC_PREREQ([2.50])
++AC_INIT([libisoburn],[1.5.4],[http://libburnia-project.org])
++AC_PREREQ([2.69])
+ dnl AC_CONFIG_HEADER([config.h])	
+ 
+ AC_CANONICAL_HOST
+@@ -11,7 +11,7 @@
+ AC_CONFIG_MACRO_DIR([./])
+ 
+ dnl Hint: Search list for version code aspects:
+-dnl       /AC_INIT(
++dnl       /AC_INIT
+ dnl       /ISOBURN_.*_VERSION
+ dnl       /LT_.*
+ dnl       /LIB.*_REQUIRED
+@@ -72,7 +72,7 @@
+ AC_FUNC_FSEEKO
+ AC_CHECK_FUNC([fseeko])
+ if test ! $ac_cv_func_fseeko; then
+-   AC_ERROR([Libburn requires largefile support.])
++   AC_MSG_ERROR(Libburn requires largefile support.)
+ fi
+ 
+ if test x$LIBISOBURN_OLD_ICONV_CONFIGURE = x

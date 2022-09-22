@@ -1,0 +1,4 @@
+# these are installed via symlinks (see xorriso.links)
+usr/bin/xorrisofs
+usr/bin/xorrecord
+usr/bin/osirrox
